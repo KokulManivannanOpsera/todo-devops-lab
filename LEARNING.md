@@ -8,17 +8,18 @@ For each step: **pain → what → how here → what breaks if removed**.
 
 **Pain:** You need something real to deploy later. Empty theory does not stick.
 
-**What:** A tiny FastAPI app with an HTML UI and SQLite.
+**What:** React UI + Node API via **Next.js** (one process). Todos in `data/todos.json`.
 
 **How here:**
-- Browser hits FastAPI
-- Forms POST to add / toggle / delete
-- Todos live in `data/todos.db`
-- `GET /health` returns `{"status":"ok"}` for later CI and deploy checks
+- Browser loads React page
+- Client calls `/api/todos` (GET/POST/PATCH/DELETE)
+- Node (Next.js) reads/writes the JSON file
+- `GET /api/health` → `{"status":"ok"}` for later CI and deploy checks
 
 **What breaks if removed:** Nothing to ship. Every later tool needs this app as the thing it wraps.
 
-**Prove aloud:** Draw browser → FastAPI → SQLite. Name the three write actions.
+**Prove aloud:** Draw browser → Next.js (React + API) → file store. Name the three write actions.
+
 
 ---
 
@@ -48,24 +49,25 @@ For each step: **pain → what → how here → what breaks if removed**.
 
 ## Step 2 — Dockerfile
 
-**Pain:** “Works on my machine.” Other laptops/servers may have the wrong Python or missing packages.
+**Pain:** “Works on my machine.” Other laptops/servers may have the wrong Node version or missing `node_modules`.
 
 **What:**
-- **Dockerfile** — recipe to build an **image** (app + Python + deps)
+- **Dockerfile** — recipe to build an **image** (Node + Next.js build + app)
 - **Image** — frozen blueprint
 - **Container** — running instance of that image
 - **Port map** (`-p 8090:8090`) — your browser → host port → container port
-- **Volume** (`-v …:/app/data`) — keep SQLite data when the container is deleted
+- **Volume** (`-v …:/app/data`) — keep `todos.json` when the container is deleted
+- **Multi-stage build** — deps → build → small runner with `output: "standalone"`
 
 **How here:**
 ```bash
-docker build -t todo-lab:0.1 .
-docker run --rm -p 8090:8090 -v todo-lab-data:/app/data todo-lab:0.1
+docker build -t todo-lab:0.2 .
+docker run --rm -p 8090:8090 -v todo-lab-data:/app/data todo-lab:0.2
 ```
-Open http://localhost:8090 — same UI, but inside a container.  
-`--host 0.0.0.0` in the Dockerfile CMD is required so Docker port publish works.
+Open http://localhost:8090 — same UI, inside a container.  
+`HOSTNAME=0.0.0.0` + `PORT=8090` so Docker port publish works.
 
-**What breaks if removed:** You’re back to “install Python + venv by hand” on every machine and in the cloud.
+**What breaks if removed:** You’re back to “install Node + npm install by hand” on every machine and in the cloud.
 
 **Prove aloud:** Image vs container? Why map ports? Why a volume for `data/`?
 

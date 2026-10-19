@@ -1,22 +1,30 @@
-# Step 2 — package the todo app so it runs the same everywhere.
-# Build:  docker build -t todo-lab:0.1 .
-# Run:    docker run --rm -p 8090:8090 -v todo-lab-data:/app/data todo-lab:0.1
+# Step 2 — React + Node (Next.js) packaged as one image.
+# Build:  docker build -t todo-lab:0.2 .
+# Run:    docker run --rm -p 8090:8090 -v todo-lab-data:/app/data todo-lab:0.2
 
-FROM python:3.10-slim
-
+FROM node:20-bookworm-slim AS deps
 WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
 
-# Install deps first (better layer caching when only code changes)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+FROM node:20-bookworm-slim AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
 
-COPY app ./app
+FROM node:20-bookworm-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=8090
+ENV HOSTNAME=0.0.0.0
 
-# Create data dir for SQLite (persist with a volume at run time)
 RUN mkdir -p /app/data
 
-ENV PYTHONUNBUFFERED=1
+# Next.js standalone output: minimal Node server
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# 0.0.0.0 = accept traffic from outside the container (needed for -p mapping)
 EXPOSE 8090
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8090"]
+CMD ["node", "server.js"]

@@ -2,6 +2,7 @@
 
 Tiny todo app used to learn DevOps **one tool at a time**.
 
+**Stack:** React + Node via **Next.js** (UI + API in one process).  
 **Now:** Step 2 — run with Docker. Still no CI/cloud yet.
 
 **Big picture:** open [`devops-flow.html`](./devops-flow.html) in a browser — tool groups + end-to-end flow diagram.
@@ -10,25 +11,23 @@ Tiny todo app used to learn DevOps **one tool at a time**.
 
 ```bash
 cd labs/todo-devops
-python3.10 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8090
+npm install
+npm run dev
 ```
 
 Open [http://localhost:8090](http://localhost:8090).
 
 - UI: add / toggle / delete todos
-- Health: [http://localhost:8090/health](http://localhost:8090/health)
+- Health: [http://localhost:8090/api/health](http://localhost:8090/api/health)
 
 (Uses **8090** so it does not clash with HelixOps `8000`/`3000` or Docker’s common `8080`.)
 
 ## Tests
 
+With the app running on 8090:
+
 ```bash
-cd labs/todo-devops
-source .venv/bin/activate
-pytest
+npm test
 ```
 
 ## Learning ladder
@@ -48,21 +47,21 @@ See [LEARNING.md](./LEARNING.md). Rule: finish the current step and explain it a
 | 8 | Logs + metrics | Later |
 | 9 | CD pipeline | Later |
 
-## Stack (Step 0)
+## Stack
 
-- FastAPI + Jinja HTML (one process)
-- SQLite file under `data/todos.db`
+- **React** UI (`src/components/TodoApp.tsx`)
+- **Node** server via Next.js App Router + API routes
+- File store: `data/todos.json` (Postgres comes in Step 7)
 
 ## Run with Docker (Step 2)
 
 ```bash
 cd labs/todo-devops
-docker build -t todo-lab:0.1 .
-docker run --rm -p 8090:8090 -v todo-lab-data:/app/data todo-lab:0.1
+docker build -t todo-lab:0.2 .
+docker run --rm -p 8090:8090 -v todo-lab-data:/app/data todo-lab:0.2
 ```
 
 Open [http://localhost:8090](http://localhost:8090).
 
 - `-p 8090:8090` maps host → container port
 - `-v todo-lab-data:/app/data` keeps todos when you stop the container
-- Stop: `Ctrl+C` (with `--rm` the container is removed; the volume keeps data)
