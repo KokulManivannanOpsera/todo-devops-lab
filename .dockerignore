@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.venv
+__pycache__
+.pytest_cache
+data/*.json
+data/*.db
+.env
+.DS_Store
+*.md
+devops-flow.html
+tests
