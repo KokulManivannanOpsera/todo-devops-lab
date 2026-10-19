@@ -24,7 +24,25 @@ For each step: **pain → what → how here → what breaks if removed**.
 
 ## Step 1 — Git branch + PR habit
 
-_Not done yet._
+**Pain:** Everyone (or future-you) pushes straight to `main`. One bad change breaks the only copy. No review, no discussion, hard to undo.
+
+**What:**
+- **Git** — history of every change on your machine
+- **Branch** — a parallel line of work so `main` stays stable
+- **Pull Request (PR)** — ask to merge the branch into `main` after review
+
+**How here:**
+1. This folder is its own Git repo (`labs/todo-devops`) — parent DeployOS may be separate
+2. First commit on `main` = Step 0 app (known-good baseline)
+3. Branch `docs/step-1-git-pr-habit` adds this lesson + `GIT_PR.md`
+4. GitHub PR shows the diff; merge when it looks right
+
+**What breaks if removed:** You lose safe collaboration and a clear “what changed” trail before Docker/CI/deploy.
+
+**Prove aloud:** Why not commit only on `main`? What does a PR protect?
+
+**See also:** [GIT_PR.md](./GIT_PR.md)
+
 
 
 
