@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DevOps end-to-end flow — Todo Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+      :root {
+        --bg: #0c1219;
+        --bg2: #141c27;
+        --panel: #1a2433;
+        --line: #2c3a4f;
+        --text: #e8eef7;
+        --muted: #8fa0b8;
+        --g1: #3ecf8e;
+        --g2: #3d9cf0;
+        --g3: #f0b429;
+        --g4: #e87a5d;
+        --g5: #a78bfa;
+        --g6: #5eead4;
+        --g7: #f472b6;
+        --g8: #94a3b8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "DM Sans", system-ui, sans-serif;
+        background:
+          radial-gradient(ellipse 90% 60% at 10% -10%, #1a3048 0%, transparent 50%),
+          radial-gradient(ellipse 70% 40% at 90% 0%, #1a2820 0%, transparent 45%),
+          var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 4rem;
+      }
+
+      header {
+        margin-bottom: 2.5rem;
+      }
+
+      header p.eyebrow {
+        margin: 0 0 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--g2);
+      }
+
+      h1 {
+        margin: 0 0 0.6rem;
+        font-size: clamp(1.75rem, 4vw, 2.35rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+      }
+
+      .lead {
+        margin: 0;
+        max-width: 42rem;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      h2 {
+        margin: 2.75rem 0 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+      }
+
+      h2 span {
+        color: var(--muted);
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-left: 0.4rem;
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0 0 1.25rem;
+      }
+
+      /* Category grid */
+      .cats {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 0.85rem;
+      }
+
+      .cat {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1rem 1.05rem 1.1rem;
+        border-top: 3px solid var(--accent, var(--g2));
+      }
+
+      .cat h3 {
+        margin: 0 0 0.35rem;
+        font-size: 0.95rem;
+        font-weight: 650;
+      }
+
+      .cat .job {
+        margin: 0 0 0.65rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .cat ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .cat li {
+        font-size: 0.85rem;
+        padding: 0.2rem 0;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--text);
+      }
+
+      .cat li em {
+        font-style: normal;
+        color: var(--muted);
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.8rem;
+      }
+
+      /* Flow diagram panel */
+      .diagram {
+        background: var(--bg2);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 1.25rem 1rem 0.5rem;
+        overflow-x: auto;
+      }
+
+      .diagram .mermaid {
+        display: flex;
+        justify-content: center;
+      }
+
+      /* Linear story */
+      .story {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-top: 0.5rem;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 3.5rem 1fr;
+        gap: 0.85rem;
+        position: relative;
+      }
+
+      .step:not(:last-child) .rail::after {
+        content: "";
+        position: absolute;
+        left: 1.35rem;
+        top: 2.6rem;
+        bottom: -0.15rem;
+        width: 2px;
+        background: var(--line);
+      }
+
+      .rail {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        padding-top: 0.15rem;
+      }
+
+      .num {
+        width: 2.7rem;
+        height: 2.7rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        background: var(--panel);
+        border: 2px solid var(--accent, var(--g2));
+        color: var(--text);
+        z-index: 1;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 0.95rem 1.1rem 1.05rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .card h3 {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+      }
+
+      .card .group {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--accent, var(--g2));
+        margin-bottom: 0.35rem;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .card code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        background: var(--bg);
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        color: var(--text);
+      }
+
+      .you-are-here {
+        outline: 1px solid var(--g1);
+        box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.15);
+      }
+
+      .you-are-here .num {
+        border-color: var(--g1);
+        background: rgba(62, 207, 142, 0.15);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.7rem 0.9rem;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--bg2);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        font-weight: 650;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      footer {
+        margin-top: 3rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 600px) {
+        .step {
+          grid-template-columns: 2.6rem 1fr;
+        }
+        .num {
+          width: 2.2rem;
+          height: 2.2rem;
+          font-size: 0.75rem;
+        }
+        .step:not(:last-child) .rail::after {
+          left: 1.05rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <p class="eyebrow">Todo DevOps Lab</p>
+        <h1>How DevOps tools work together — end to end</h1>
+        <p class="lead">
+          From the first line of code to keeping the app healthy in production.
+          Tools are grouped by job. One flow. Same todo app the whole way.
+        </p>
+      </header>
+
+      <h2>1. Tool groups <span>by job</span></h2>
+      <p class="note">
+        Same categories companies use. We add one group at a time on the todo
+        app.
+      </p>
+
+      <div class="cats">
+        <article class="cat" style="--accent: var(--g1)">
+          <h3>A · Write &amp; collaborate</h3>
+          <p class="job">Change code without chaos</p>
+          <ul>
+            <li>Editor / IDE</li>
+            <li>Git</li>
+            <li>GitHub <em>· PRs, reviews</em></li>
+          </ul>
+        </article>
+        <article class="cat" style="--accent: var(--g2)">
+          <h3>B · Build &amp; package</h3>
+          <p class="job">Same app on every machine</p>
+          <ul>
+            <li>Dockerfile</li>
+            <li>Image registry <em>· GHCR / ECR</em></li>
+            <li>docker compose</li>
+          </ul>
+        </article>
+        <article class="cat" style="--accent: var(--g3)">
+          <h3>C · Verify (CI)</h3>
+          <p class="job">Catch breaks before merge</p>
+          <ul>
+            <li>GitHub Actions</li>
+            <li>pytest / linters</li>
+            <li>Scanners <em>· Trivy / Dependabot</em></li>
+          </ul>
+        </article>
+        <article class="cat" style="--accent: var(--g4)">
+          <h3>D · Configure &amp; secrets</h3>
+          <p class="job">Env-specific, not in git</p>
+          <ul>
+            <li>.env (local only)</li>
+            <li>GitHub Secrets</li>
+            <li>Vault / cloud secrets</li>
+          </ul>
+        </article>
+        <article class="cat" style="--accent: var(--g5)">
+          <h3>E · Run &amp; data</h3>
+          <p class="job">Process + durable state</p>
+          <ul>
+            <li>Uvicorn / containers</li>
+            <li>SQLite → Postgres</li>
+            <li>Redis / S3 <em>· later</em></li>
+          </ul>
+        </article>
+        <article class="cat" style="--accent: var(--g6)">
+          <h3>F · Ship (CD / cloud)</h3>
+          <p class="job">Get a public URL</p>
+          <ul>
+            <li>Railway / Render / Fly</li>
+            <li>AWS / GCP / Azure</li>
+            <li>Argo CD / Flux <em>· later</em></li>
+          </ul>
+        </article>
+        <article class="cat" style="--accent: var(--g7)">
+          <h3>G · Observe &amp; operate</h3>
+          <p class="job">Know when it breaks</p>
+          <ul>
+            <li>Logs</li>
+            <li>Metrics / alerts</li>
+            <li>Traces / runbooks</li>
+          </ul>
+        </article>
+        <article class="cat" style="--accent: var(--g8)">
+          <h3>H · Scale (later)</h3>
+          <p class="job">Many instances, many teams</p>
+          <ul>
+            <li>Kubernetes + Helm</li>
+            <li>Terraform / Pulumi</li>
+            <li>Load balancers</li>
+          </ul>
+        </article>
+      </div>
+
+      <h2>2. End-to-end flow <span>one diagram</span></h2>
+      <p class="note">
+        Left → right is time: write → review → check → package → configure →
+        deploy → run → watch. Feedback loops (red arrows) send you back to
+        code when something fails.
+      </p>
+
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart LR
+  subgraph write ["A Write"]
+    IDE["IDE / code"]
+    Git["Git commit"]
+    IDE --> Git
+  end
+
+  subgraph collab ["A Collaborate"]
+    PR["GitHub PR"]
+    Review["Review"]
+    Git --> PR --> Review
+  end
+
+  subgraph ci ["C Verify CI"]
+    Actions["GitHub Actions"]
+    Tests["pytest / lint / scan"]
+    Review --> Actions --> Tests
+  end
+
+  subgraph pack ["B Package"]
+    Docker["Dockerfile → image"]
+    Tests -->|pass| Docker
+  end
+
+  subgraph cfg ["D Config"]
+    Secrets["Secrets + env"]
+    Docker --> Secrets
+  end
+
+  subgraph ship ["F Ship"]
+    Deploy["Railway / Render / cloud"]
+    Secrets --> Deploy
+  end
+
+  subgraph run ["E Run"]
+    App["Todo app containers"]
+    DB["SQLite / Postgres"]
+    Deploy --> App --> DB
+  end
+
+  subgraph watch ["G Observe"]
+    Logs["Logs + metrics + alerts"]
+    App --> Logs
+  end
+
+  Tests -.->|fail| IDE
+  Logs -.->|incident| IDE
+        </pre>
+      </div>
+
+      <h2>3. Same story as a timeline <span>what happens when</span></h2>
+
+      <div class="story">
+        <div class="step you-are-here">
+          <div class="rail"><div class="num" style="--accent: var(--g1)">0</div></div>
+          <div class="card you-are-here" style="--accent: var(--g1)">
+            <span class="group">You are here</span>
+            <h3>Write the app locally</h3>
+            <p>
+              FastAPI + Jinja + SQLite on <code>:8090</code>. Client = browser,
+              server = Uvicorn. No Docker/CI/cloud yet — on purpose.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="rail"><div class="num" style="--accent: var(--g1)">1</div></div>
+          <div class="card" style="--accent: var(--g1)">
+            <span class="group">A · Write &amp; collaborate</span>
+            <h3>Branch → commit → pull request</h3>
+            <p>
+              You change code on a branch. Git stores history. GitHub PR lets
+              someone (or future-you) review before <code>main</code> changes.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="rail"><div class="num" style="--accent: var(--g3)">2</div></div>
+          <div class="card" style="--accent: var(--g3)">
+            <span class="group">C · Verify</span>
+            <h3>CI runs on the PR</h3>
+            <p>
+              GitHub Actions starts when you open/push a PR. It installs deps,
+              runs <code>pytest</code> (later lint + image scan). Red check =
+              do not merge.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="rail"><div class="num" style="--accent: var(--g2)">3</div></div>
+          <div class="card" style="--accent: var(--g2)">
+            <span class="group">B · Package</span>
+            <h3>Docker image</h3>
+            <p>
+              Dockerfile = recipe. Build produces an image (app + Python +
+              deps). Same image runs on your laptop and in the cloud.
+              Compose starts multiple containers with one command.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="rail"><div class="num" style="--accent: var(--g4)">4</div></div>
+          <div class="card" style="--accent: var(--g4)">
+            <span class="group">D · Config</span>
+            <h3>Env vars &amp; secrets</h3>
+            <p>
+              Port, DB URL, API keys differ for local / staging / prod. They
+              live in the host’s secret store — never committed to Git.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="rail"><div class="num" style="--accent: var(--g6)">5</div></div>
+          <div class="card" style="--accent: var(--g6)">
+            <span class="group">F · Ship</span>
+            <h3>Deploy to the cloud</h3>
+            <p>
+              Platform pulls the image (or buildpack), injects secrets, exposes
+              HTTPS URL. <code>/health</code> proves the process is up. CD
+              later means: merge to main → deploy automatically.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="rail"><div class="num" style="--accent: var(--g5)">6</div></div>
+          <div class="card" style="--accent: var(--g5)">
+            <span class="group">E · Run &amp; data</span>
+            <h3>App + database in production</h3>
+            <p>
+              App containers serve traffic. SQLite is fine for the lab start;
+              Postgres becomes the shared source of truth when you need a real
+              DB server. Redis/S3 appear when cache or big files hurt.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="rail"><div class="num" style="--accent: var(--g7)">7</div></div>
+          <div class="card" style="--accent: var(--g7)">
+            <span class="group">G · Observe</span>
+            <h3>Logs, metrics, alerts</h3>
+            <p>
+              Something fails at 2am → logs show the error, metrics show the
+              spike, alert pages a human, runbook says how to recover. Loop
+              back to code (fix) or config (rollback).
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="rail"><div class="num" style="--accent: var(--g8)">8</div></div>
+          <div class="card" style="--accent: var(--g8)">
+            <span class="group">H · Scale — later</span>
+            <h3>K8s, Terraform, many regions</h3>
+            <p>
+              Only when one box is not enough: orchestrate many containers
+              (Kubernetes), define infra as code (Terraform), add load
+              balancers. Same flow — more automation underneath.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h2>4. How tools talk to each other</h2>
+      <p class="note">Each arrow is a handoff. DevOps is mostly these handoffs.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>What moves</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>IDE</td>
+            <td>Git</td>
+            <td>File diffs → commit</td>
+          </tr>
+          <tr>
+            <td>Git</td>
+            <td>GitHub</td>
+            <td>Push branch / open PR</td>
+          </tr>
+          <tr>
+            <td>GitHub</td>
+            <td>Actions</td>
+            <td>Webhook: “PR updated”</td>
+          </tr>
+          <tr>
+            <td>Actions</td>
+            <td>pytest / scanners</td>
+            <td>Checkout code, run commands</td>
+          </tr>
+          <tr>
+            <td>Actions</td>
+            <td>Docker / registry</td>
+            <td>Build &amp; push image (when CI passes)</td>
+          </tr>
+          <tr>
+            <td>Secrets store</td>
+            <td>Deploy platform</td>
+            <td>Env vars injected at runtime</td>
+          </tr>
+          <tr>
+            <td>Deploy platform</td>
+            <td>App + DB</td>
+            <td>Start containers, attach volume/DB</td>
+          </tr>
+          <tr>
+            <td>App</td>
+            <td>Logs / metrics</td>
+            <td>stdout events + numeric series</td>
+          </tr>
+          <tr>
+            <td>Alerts</td>
+            <td>Human + Git</td>
+            <td>Page → fix → new PR (loop)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>5. Lab map <span>what we add when</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Lab step</th>
+            <th>Group</th>
+            <th>Tool</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0 (done)</td>
+            <td>E</td>
+            <td>FastAPI, Uvicorn, SQLite</td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>A</td>
+            <td>Branch + PR habit</td>
+          </tr>
+          <tr>
+            <td>2–3</td>
+            <td>B</td>
+            <td>Dockerfile, compose</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>C</td>
+            <td>GitHub Actions + pytest</td>
+          </tr>
+          <tr>
+            <td>5 + 9</td>
+            <td>F</td>
+            <td>Deploy, then CD</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>D</td>
+            <td>Env + secrets</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>E</td>
+            <td>Postgres</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>G</td>
+            <td>Logs + metrics</td>
+          </tr>
+          <tr>
+            <td>Later</td>
+            <td>C / H</td>
+            <td>Trivy, Terraform, K8s, …</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <footer>
+        File:
+        <code>labs/todo-devops/devops-flow.html</code>
+        — open in a browser. When ready, continue with lab Step 1 or 2.
+      </footer>
+    </div>
+
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "dark",
+        flowchart: { curve: "basis", padding: 12 },
+        themeVariables: {
+          primaryColor: "#1a2433",
+          primaryTextColor: "#e8eef7",
+          primaryBorderColor: "#3d9cf0",
+          lineColor: "#8fa0b8",
+          secondaryColor: "#141c27",
+          tertiaryColor: "#0c1219",
+          fontFamily: "DM Sans, sans-serif",
+        },
+      });
+    </script>
+  </body>
+</html>
