@@ -37,9 +37,9 @@ See [LEARNING.md](./LEARNING.md). Rule: finish the current step and explain it a
 
 | Step | Tool | Status |
 |------|------|--------|
-| 0 | Todo app | Current |
-| 1 | Git branch + PR habit | Next |
-| 2 | Dockerfile | Later |
+| 0 | Todo app | Done |
+| 1 | Git branch + PR habit | Current — see [GIT_PR.md](./GIT_PR.md) |
+| 2 | Dockerfile | Next |
 | 3 | docker compose | Later |
 | 4 | GitHub Actions CI | Later |
 | 5 | Deploy (Railway/Render) | Later |
