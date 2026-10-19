@@ -1,0 +1,13 @@
+.venv
+venv
+.git
+.pytest_cache
+__pycache__
+*.py[cod]
+*.db
+data/*.db
+.env
+.DS_Store
+tests
+*.md
+devops-flow.html

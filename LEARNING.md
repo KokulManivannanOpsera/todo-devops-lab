@@ -48,7 +48,27 @@ For each step: **pain → what → how here → what breaks if removed**.
 
 ## Step 2 — Dockerfile
 
-_Not done yet._
+**Pain:** “Works on my machine.” Other laptops/servers may have the wrong Python or missing packages.
+
+**What:**
+- **Dockerfile** — recipe to build an **image** (app + Python + deps)
+- **Image** — frozen blueprint
+- **Container** — running instance of that image
+- **Port map** (`-p 8090:8090`) — your browser → host port → container port
+- **Volume** (`-v …:/app/data`) — keep SQLite data when the container is deleted
+
+**How here:**
+```bash
+docker build -t todo-lab:0.1 .
+docker run --rm -p 8090:8090 -v todo-lab-data:/app/data todo-lab:0.1
+```
+Open http://localhost:8090 — same UI, but inside a container.  
+`--host 0.0.0.0` in the Dockerfile CMD is required so Docker port publish works.
+
+**What breaks if removed:** You’re back to “install Python + venv by hand” on every machine and in the cloud.
+
+**Prove aloud:** Image vs container? Why map ports? Why a volume for `data/`?
+
 
 ## Step 3 — docker compose
 

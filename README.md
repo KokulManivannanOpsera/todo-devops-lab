@@ -2,7 +2,7 @@
 
 Tiny todo app used to learn DevOps **one tool at a time**.
 
-**Step 0 (now):** app runs on your laptop only — no Docker, CI, or cloud.
+**Now:** Step 2 — run with Docker. Still no CI/cloud yet.
 
 **Big picture:** open [`devops-flow.html`](./devops-flow.html) in a browser — tool groups + end-to-end flow diagram.
 
@@ -38,9 +38,9 @@ See [LEARNING.md](./LEARNING.md). Rule: finish the current step and explain it a
 | Step | Tool | Status |
 |------|------|--------|
 | 0 | Todo app | Done |
-| 1 | Git branch + PR habit | Current — see [GIT_PR.md](./GIT_PR.md) |
-| 2 | Dockerfile | Next |
-| 3 | docker compose | Later |
+| 1 | Git branch + PR habit | Done — see [GIT_PR.md](./GIT_PR.md) |
+| 2 | Dockerfile | Current — see below |
+| 3 | docker compose | Next |
 | 4 | GitHub Actions CI | Later |
 | 5 | Deploy (Railway/Render) | Later |
 | 6 | Env + secrets | Later |
@@ -52,4 +52,17 @@ See [LEARNING.md](./LEARNING.md). Rule: finish the current step and explain it a
 
 - FastAPI + Jinja HTML (one process)
 - SQLite file under `data/todos.db`
-- No containers yet on purpose — so you feel the “before” state
+
+## Run with Docker (Step 2)
+
+```bash
+cd labs/todo-devops
+docker build -t todo-lab:0.1 .
+docker run --rm -p 8090:8090 -v todo-lab-data:/app/data todo-lab:0.1
+```
+
+Open [http://localhost:8090](http://localhost:8090).
+
+- `-p 8090:8090` maps host → container port
+- `-v todo-lab-data:/app/data` keeps todos when you stop the container
+- Stop: `Ctrl+C` (with `--rm` the container is removed; the volume keeps data)
